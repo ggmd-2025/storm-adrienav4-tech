@@ -43,9 +43,7 @@ public class ExitBolt implements IRichBolt {
 	
 
 	
-	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
-	 */
+
 	public void declareOutputFields(OutputFieldsDeclarer arg0) {
 		arg0.declare(new Fields("json"));
 	}
@@ -65,9 +63,7 @@ public class ExitBolt implements IRichBolt {
 		
 	}
 	
-	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IRichBolt#prepare(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.task.OutputCollector)
-	 */
+
 	@SuppressWarnings("rawtypes")
 	public void prepare(Map arg0, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;

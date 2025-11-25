@@ -15,7 +15,13 @@ public class GiveRankBolt extends BaseBasicBolt {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         try {
-            String jsonStr = input.getString(0);
+            // Lire le JSON avec le préfixe d'ID
+            String prefixedJson = input.getStringByField("json");
+            
+            // Extraire l'ID et le JSON
+            String[] parts = prefixedJson.split("\\|\\|\\|", 2);
+            int myTortoiseId = Integer.parseInt(parts[0]);
+            String jsonStr = parts[1];
             
             int runnersStart = jsonStr.indexOf("[", jsonStr.indexOf("runners"));
             int runnersEnd = jsonStr.lastIndexOf("]");
@@ -34,8 +40,6 @@ public class GiveRankBolt extends BaseBasicBolt {
                 int id = extractIntValue(runner, "id");
                 int top = extractIntValue(runner, "top");
                 int cellule = extractIntValue(runner, "cellule");
-                int total = extractIntValue(runner, "total");
-                int maxcel = extractIntValue(runner, "maxcel");
                 
                 if (currentTop == -1) {
                     currentTop = top;
@@ -50,25 +54,31 @@ public class GiveRankBolt extends BaseBasicBolt {
             
             Map<Integer, Integer> rankMap = calculateRanks(positions);
             
+            // N'émettre QUE pour ma tortue
             for (String runner : runners) {
                 runner = runner.replaceAll("[{}\\[\\]]", "");
                 
                 int id = extractIntValue(runner, "id");
-                int top = extractIntValue(runner, "top");
-                int total = extractIntValue(runner, "total");
-                int maxcel = extractIntValue(runner, "maxcel");
                 
-                String rang = getRankString(rankMap, id, positions);
-                
-                collector.emit(new Values(
-                    id,
-                    top,
-                    rang,
-                    total,
-                    maxcel
-                ));
-                
-                //System.out.println("Tortoise id=" + id + " - top=" + top + " - rang=" + rang);
+                // Filtrer uniquement ma tortue
+                if (id == myTortoiseId) {
+                    int top = extractIntValue(runner, "top");
+                    int total = extractIntValue(runner, "total");
+                    int maxcel = extractIntValue(runner, "maxcel");
+                    
+                    String rang = getRankString(rankMap, id, positions);
+                    
+                    collector.emit(new Values(
+                        id,
+                        top,
+                        rang,
+                        total,
+                        maxcel
+                    ));
+                    
+                    System.out.println("GiveRankBolt - Tortoise id=" + id + " - top=" + top + " - rang=" + rang);
+                    break; // On a trouvé notre tortue, pas besoin de continuer
+                }
             }
             
         } catch (Exception e) {

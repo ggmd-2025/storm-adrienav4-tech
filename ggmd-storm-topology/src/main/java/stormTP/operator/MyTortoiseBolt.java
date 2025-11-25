@@ -31,8 +31,9 @@ public class MyTortoiseBolt extends BaseBasicBolt {
             
             String[] runners = runnersStr.split("}\\s*,\\s*\\{");
             
+            boolean foundMyTortoise = false;
+            
             for (String runner : runners) {
-
                 runner = runner.replaceAll("[{}\\[\\]]", "");
                 
                 int id = extractIntValue(runner, "id");
@@ -43,28 +44,25 @@ public class MyTortoiseBolt extends BaseBasicBolt {
                     int maxcel = extractIntValue(runner, "maxcel");
                     
                     cellCounter++;
+                    foundMyTortoise = true;
                     
-                    collector.emit(new Values(
-                        id,
-                        top,
-                        tortoiseName,
-                        cellCounter,
-                        total,
-                        maxcel
-                    ));
-                    
-                    //System.out.println("Tortoise " + tortoiseName + " (id=" + id + ") - cells: " + cellCounter + ", top: " + top);
+                    System.out.println("Tortoise " + tortoiseName + " (id=" + id + ") - cells: " + cellCounter + ", top: " + top);
                 }
             }
+            
+            // Réémettre le JSON original avec un marqueur pour identifier notre tortue
+            if (foundMyTortoise) {
+                // On préfixe le JSON avec l'ID de la tortue suivi d'un séparateur
+                String jsonWithId = tortoiseId + "|||" + jsonStr;
+                collector.emit(new Values(jsonWithId));
+            }
+            
         } catch (Exception e) {
             System.err.println("Error in MyTortoiseBolt: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    /**
-     * Helper method to extract integer values from JSON string
-     */
     private int extractIntValue(String jsonStr, String key) {
         int keyIndex = jsonStr.indexOf("\"" + key + "\"");
         if (keyIndex == -1) {
@@ -82,6 +80,7 @@ public class MyTortoiseBolt extends BaseBasicBolt {
     
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("id", "top", "nom", "nbCellsParcourus", "total", "maxcel"));
+        // On émet maintenant un JSON qui contient l'ID de la tortue
+        declarer.declare(new Fields("json"));
     }
 }
