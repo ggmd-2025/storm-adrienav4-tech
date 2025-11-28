@@ -24,23 +24,18 @@ public class Exit4Bolt implements IRichBolt {
     @Override
     public void execute(Tuple input) {
         try {
-            // Récupérer les champs du tuple
             int id = input.getIntegerByField("id");
             String tops = input.getStringByField("tops");
             int score = input.getIntegerByField("score");
             
-            // Créer le JSON
             String jsonString = String.format(
                 "{\"id\":%d,\"tops\":\"%s\",\"score\":%d}",
                 id, tops, score
             );
             
-            // Envoyer via StreamEmiter (réseau)
             this.semit.send(jsonString);
-            
             System.out.println("Exit4Bolt - Envoyé -> " + jsonString);
             
-            // Acquitter le tuple
             collector.ack(input);
             
         } catch (Exception e) {
@@ -67,6 +62,5 @@ public class Exit4Bolt implements IRichBolt {
     
     @Override
     public void cleanup() {
-        // Fermer proprement le StreamEmiter si nécessaire
     }
 }

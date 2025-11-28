@@ -50,9 +50,7 @@ public class MyTortoiseBolt extends BaseBasicBolt {
                 }
             }
             
-            // Réémettre le JSON original avec un marqueur pour identifier notre tortue
             if (foundMyTortoise) {
-                // On préfixe le JSON avec l'ID de la tortue suivi d'un séparateur
                 String jsonWithId = tortoiseId + "|||" + jsonStr;
                 collector.emit(new Values(jsonWithId));
             }
@@ -80,7 +78,6 @@ public class MyTortoiseBolt extends BaseBasicBolt {
     
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        // On émet maintenant un JSON qui contient l'ID de la tortue
         declarer.declare(new Fields("json"));
     }
 }

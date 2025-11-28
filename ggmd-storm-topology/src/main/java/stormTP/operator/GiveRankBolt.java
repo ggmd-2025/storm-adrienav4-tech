@@ -15,14 +15,11 @@ public class GiveRankBolt extends BaseBasicBolt {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         try {
-            // Lire le JSON avec le préfixe d'ID
             String prefixedJson = input.getStringByField("json");
             
-            // Extraire l'ID et le JSON
             String[] parts = prefixedJson.split("\\|\\|\\|", 2);
             int myTortoiseId = Integer.parseInt(parts[0]);
             String jsonStr = parts[1];
-            
             int runnersStart = jsonStr.indexOf("[", jsonStr.indexOf("runners"));
             int runnersEnd = jsonStr.lastIndexOf("]");
             String runnersStr = jsonStr.substring(runnersStart + 1, runnersEnd);
@@ -33,10 +30,8 @@ public class GiveRankBolt extends BaseBasicBolt {
             Map<Integer, Integer> positions = new HashMap<>();
             
             for (String runner : runners) {
-                // Clean up the runner string
                 runner = runner.replaceAll("[{}\\[\\]]", "");
                 
-                // Extract values
                 int id = extractIntValue(runner, "id");
                 int top = extractIntValue(runner, "top");
                 int cellule = extractIntValue(runner, "cellule");
@@ -54,13 +49,11 @@ public class GiveRankBolt extends BaseBasicBolt {
             
             Map<Integer, Integer> rankMap = calculateRanks(positions);
             
-            // N'émettre QUE pour ma tortue
             for (String runner : runners) {
                 runner = runner.replaceAll("[{}\\[\\]]", "");
                 
                 int id = extractIntValue(runner, "id");
                 
-                // Filtrer uniquement ma tortue
                 if (id == myTortoiseId) {
                     int top = extractIntValue(runner, "top");
                     int total = extractIntValue(runner, "total");
@@ -77,7 +70,7 @@ public class GiveRankBolt extends BaseBasicBolt {
                     ));
                     
                     System.out.println("GiveRankBolt - Tortoise id=" + id + " - top=" + top + " - rang=" + rang);
-                    break; // On a trouvé notre tortue, pas besoin de continuer
+                    break; 
                 }
             }
             
@@ -104,7 +97,6 @@ public class GiveRankBolt extends BaseBasicBolt {
         int rank = rankMap.get(id);
         int position = positions.get(id);
         
-        // Check for ties (other tortoise with same position)
         boolean hasTie = positions.values().stream()
             .filter(p -> !p.equals(position))
             .count() < positions.size() - 1;

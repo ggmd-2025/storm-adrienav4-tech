@@ -16,19 +16,14 @@ public class TopologyT3 {
         int portOUTPUT = Integer.parseInt(args[1]);
         
         InputStreamSpout spout = new InputStreamSpout("127.0.0.1", portINPUT);
-        
         TopologyBuilder builder = new TopologyBuilder();
-        
         builder.setSpout("masterStream", spout);
-        
         builder.setBolt("giveRank", 
                        new GiveRankBolt(), 
                        nbExecutors).shuffleGrouping("masterStream");
-        
         builder.setBolt("exit", 
                        new Exit3Bolt(portOUTPUT), 
                        nbExecutors).shuffleGrouping("giveRank");
-        
         Config config = new Config();
         
         StormSubmitter.submitTopology("topoT3", config, builder.createTopology());
